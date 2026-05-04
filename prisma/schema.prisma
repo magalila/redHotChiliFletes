@@ -1,0 +1,170 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- IDENTIDAD Y ROLES ---
+
+enum Role {
+  CLIENTE
+  PROVEEDOR
+  ADMIN
+}
+
+model User {
+  id              String    @id @default(uuid())
+  nombre          String
+  email           String    @unique
+  passwordHash    String
+  rol             Role      @default(CLIENTE)
+  telefono        String?
+  fechaCreacion   DateTime  @default(now())
+  
+  // Relación con Licencia (Para validar categorías)
+  licencia        License?
+
+  vehiculos       Vehicle[] 
+  pedidosCliente  Order[]   @relation("ClienteOrders")
+  viajesProveedor Order[]   @relation("ProveedorOrders")
+}
+
+// --- NUEVO: ENTIDAD LICENCIA ---
+// Esto permite validar que el proveedor está apto antes de registrar vehículos
+model License {
+  id               String    @id @default(uuid())
+  userId           String    @unique
+  usuario          User      @relation(fields: [userId], references: [id])
+  categoria        String    // Ej: "A.1" (Moto), "B.1" (Auto/Furgón)
+  nroLicencia      String
+  fechaVencimiento DateTime
+  fileUrl          String
+  estado           DocStatus @default(PENDIENTE)
+}
+
+// --- FLOTA Y DOCUMENTACIÓN ---
+
+enum DocType {
+  SEGURO
+  VTV
+  CEDULA
+}
+
+enum DocStatus {
+  PENDIENTE
+  APROBADO
+  RECHAZADO
+}
+
+model Vehicle {
+  id              String           @id @default(uuid())
+  id_proveedor    String
+  proveedor       User             @relation(fields: [id_proveedor], references: [id])
+  
+  // Cambiamos a Enum para facilitar validaciones de lógica de negocio
+  tipo_vehiculo   VehicleType      
+  patente         String           @unique
+  modelo          String?
+  capacidadVol    Float?           
+  capacidadPeso   Float?           
+  estaHabilitado  Boolean          @default(false)
+  
+  documentos      VehicleDocument[]
+  orders          Order[]
+}
+
+enum VehicleType {
+  MOTO
+  FLETE
+  CAMIONETA
+}
+
+model VehicleDocument {
+  id               String    @id @default(uuid())
+  vehicleId        String
+  vehiculo         Vehicle   @relation(fields: [vehicleId], references: [id])
+  tipo             DocType
+  fileUrl          String    
+  fechaVencimiento DateTime
+  estado           DocStatus @default(PENDIENTE)
+  observaciones    String?
+}
+
+// --- LOGÍSTICA Y MULTIPARADAS ---
+
+enum ServiceType {
+  MANDADO
+  FLETE
+}
+
+enum OrderStatus {
+  BUSCANDO
+  ASIGNADO
+  EN_VIAJE
+  ENTREGADO
+  CANCELADO
+}
+
+model Order {
+  id                String      @id @default(uuid())
+  tipo              ServiceType
+  estado            OrderStatus @default(BUSCANDO)
+  
+  clienteId         String
+  cliente           User        @relation("ClienteOrders", fields: [clienteId], references: [id])
+  
+  proveedorId       String?
+  proveedor         User?       @relation("ProveedorOrders", fields: [proveedorId], references: [id])
+  
+  vehiculoId        String?
+  vehiculo          Vehicle?    @relation(fields: [vehiculoId], references: [id])
+
+  paradas           Stop[]
+  
+  distanciaTotal    Float       
+  precioTotal       Float
+  comisionApp       Float
+  
+  fechaServicio     DateTime    @default(now())
+  
+  transaccion       Transaction?
+  review            Review?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+}
+
+model Stop {
+  id           String   @id @default(uuid())
+  orderId      String
+  order        Order    @relation(fields: [orderId], references: [id])
+  direccion    String
+  lat          Float
+  lng          Float
+  ordenVisita  Int      
+  esEntrega    Boolean  @default(true)
+}
+
+// --- FINANZAS Y CALIDAD ---
+
+model Transaction {
+  id          String   @id @default(uuid())
+  orderId     String   @unique
+  order       Order    @relation(fields: [orderId], references: [id])
+  monto       Float
+  metodoPago  String   
+  estadoPago  String   
+  fecha       DateTime @default(now())
+}
+
+model Review {
+  id           String   @id @default(uuid())
+  orderId      String   @unique
+  order        Order    @relation(fields: [orderId], references: [id])
+  calificacion Int      
+  comentario   String?
+}
