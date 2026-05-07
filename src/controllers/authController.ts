@@ -11,7 +11,7 @@ export const register = async (req: Request, res: Response) => {
     try {
         // 1. Generar la "sal" (salt) para la encriptación
         const saltRounds = 10;
-
+        
         // 2. Encriptar la contraseña de forma asíncrona
         const passwordEncriptada = await bcrypt.hash(password, saltRounds);
 
@@ -21,14 +21,14 @@ export const register = async (req: Request, res: Response) => {
                 nombre,
                 email,
                 passwordHash: passwordEncriptada, // Guardamos el hash, no el texto plano
-                rol,
+                rol, 
                 telefono
             }
         });
 
-        res.status(201).json({
-            mensaje: 'Usuario creado con éxito',
-            usuario: newUser.email
+        res.status(201).json({ 
+            mensaje: 'Usuario creado con éxito', 
+            usuario: newUser.email 
         });
     } catch (error) {
         console.error(error);
@@ -56,19 +56,19 @@ export const login = async (req: Request, res: Response) => {
         // Usamos una frase secreta para firmar el token (en producción va al .env)
         const token = jwt.sign(
             { userId: user.id, rol: user.rol },
-            'MI_FRASE_SUPER_SECRETA',
+            'MI_FRASE_SUPER_SECRETA', 
             { expiresIn: '8h' }
         );
 
-        // En auth.controller.ts - Función login
-        res.json({
-            mensaje: 'Login exitoso',
-            token,
-            usuario: { // Asegúrate de que se llame 'usuario' para que login.js lo encuentre
-                nombre: user.nombre,
-                rol: user.rol
-            }
-        });
+       // En auth.controller.ts - Función login
+res.json({
+    mensaje: 'Login exitoso',
+    token,
+    usuario: { // Asegúrate de que se llame 'usuario' para que login.js lo encuentre
+        nombre: user.nombre, 
+        rol: user.rol 
+    }
+});
     } catch (error) {
         res.status(500).json({ error: 'Error en el servidor' });
     }

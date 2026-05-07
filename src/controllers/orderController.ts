@@ -129,7 +129,7 @@ export const acceptOrder = async (req: Request, res: Response) => {
 };
 
 export const updateOrderStatus = async (req: Request, res: Response) => {
-    const orderId = req.params.orderId as string; 
+    const orderId = req.params.orderId as string;
     const { nuevoEstado } = req.body; // Recibimos el estado desde el body de Postman
     const proveedorId = (req as any).userId;
 
@@ -183,6 +183,7 @@ export const getProviderOrders = async (req: Request, res: Response) => {
 
 export const getAdminStats = async (req: Request, res: Response) => {
     try {
+        // 1. Agregamos sumas y conteos totales
         const stats = await db.order.aggregate({
             _sum: {
                 precioTotal: true,
@@ -193,18 +194,84 @@ export const getAdminStats = async (req: Request, res: Response) => {
             }
         });
 
+        // 2. Traemos solo los pedidos que ya están finalizados (ENTREGADO)
         const pedidosFinalizados = await db.order.count({
             where: { estado: 'ENTREGADO' }
         });
 
+        // 3. Respuesta limpia para el frontend
         res.json({
-            mensaje: "Resumen operativo del sistema",
             totalMovido: stats._sum.precioTotal || 0,
             gananciaPlataforma: stats._sum.comisionApp || 0,
-            cantidadPedidosTotales: stats._count.id,
+            totalPedidos: stats._count.id, // Nombre alineado con el HTML
             pedidosCompletados: pedidosFinalizados
         });
     } catch (error) {
+        console.error("Error al generar KPIs:", error);
         res.status(500).json({ error: 'Error al generar estadísticas' });
+    }
+};
+
+
+
+// En tu controlador de vehículos
+// export const getPendingVehicles = async (req: Request, res: Response) => {
+//     try {
+//         const vehicles = await db.vehicle.findMany({
+//             where: { estaHabilitado: false },
+//             include: {
+//                 proveedor: true // <--- ¡ESTO ES LO QUE TE FALTA PARA QUE APAREZCA EL NOMBRE!
+//             }
+//         });
+//         res.json(vehicles);
+//     } catch (error) {
+//         res.status(500).json({ error: 'Error al obtener flota' });
+//     }
+// };
+// En tu controlador de vehículos
+// En orderController.ts
+export const getPendingVehicles = async (req: Request, res: Response) => {
+    try {
+        const vehicles = await db.vehicle.findMany({
+            where: { estaHabilitado: false },
+            include: {
+                proveedor: {
+                    select: {
+                        id: true,
+                        nombre: true,
+                        email: true,
+                        telefono: true // <-- ESTO OBLIGA A PRISMA A TRAERLO
+                    }
+                }
+            }
+        });
+
+        // Agregá este log para ver en la terminal de VS Code si el servidor lo tiene
+        console.log("DATOS DESDE BD:", JSON.stringify(vehicles[0]?.proveedor, null, 2));
+
+        res.json(vehicles);
+    } catch (error) {
+        res.status(500).json({ error: 'Error al obtener flota' });
+    }
+};
+export const updateVehicleStatus = async (req: Request, res: Response) => {
+    // Línea 239: Solucionamos el error 'string | string[]' asegurando que es string
+    const id = req.params.id as string; 
+    
+    // Suponiendo que el Admin envía un booleano para habilitar/deshabilitar
+    const { habilitar } = req.body; 
+
+    try {
+        await db.vehicle.update({
+            where: { id: id },
+            data: { 
+                // Línea 240: Cambiamos 'estado' por 'estaHabilitado'
+                estaHabilitado: habilitar 
+            }
+        });
+        res.json({ mensaje: 'Estado del vehículo actualizado con éxito' });
+    } catch (error) {
+        console.error(error);
+        res.status(400).json({ error: 'No se pudo actualizar el vehículo' });
     }
 };

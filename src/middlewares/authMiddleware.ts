@@ -18,3 +18,19 @@ export const verificarToken = (req: Request, res: Response, next: NextFunction) 
         res.status(403).json({ error: 'Token inválido' });
     }
 };
+
+
+
+
+// CLAVE: Asegurate que diga 'export'
+export const esAdmin = (req: Request, res: Response, next: NextFunction) => {
+    const rol = (req as any).rol;
+
+    if (rol !== 'ADMIN') {
+        return res.status(403).json({ 
+            error: 'Acceso denegado: Se requieren permisos de administrador.' 
+        });
+    }
+    
+    next();
+};
