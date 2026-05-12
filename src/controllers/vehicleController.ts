@@ -11,7 +11,8 @@ export const getPendingVehicles = async (req: Request, res: Response) => {
                 proveedor: { 
                     select: { 
                         nombre: true, 
-                        email: true 
+                        email: true, 
+                        telefono: true,
                     } 
                 } 
             }

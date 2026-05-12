@@ -1,12 +1,10 @@
 import type { Request, Response } from 'express';
 import db from '../db.js';
-// Cambiamos 'bcrypt' por 'bcryptjs'
 import bcrypt from 'bcryptjs';
-// import bcrypt from 'bcrypt'; // Importamos bcrypt
 import jwt from 'jsonwebtoken';
 
 export const register = async (req: Request, res: Response) => {
-    const { nombre, email, password, rol, telefono } = req.body;
+    const { nombre, email, password, rol, telefono, dni } = req.body;
 
     try {
         // 1. Generar la "sal" (salt) para la encriptación
@@ -20,9 +18,11 @@ export const register = async (req: Request, res: Response) => {
             data: {
                 nombre,
                 email,
+                dni,
                 passwordHash: passwordEncriptada, // Guardamos el hash, no el texto plano
                 rol, 
-                telefono
+                telefono,
+        
             }
         });
 
@@ -32,7 +32,7 @@ export const register = async (req: Request, res: Response) => {
         });
     } catch (error) {
         console.error(error);
-        res.status(400).json({ error: 'El email ya existe o los datos son inválidos' });
+        res.status(400).json({ error: 'El email o DNI ya existen, o datos inválidos' });
     }
 };
 

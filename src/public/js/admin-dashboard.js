@@ -1,250 +1,17 @@
-// // 1. Protección de Ruta (Ejecución inmediata)
-// (function () {
-//     const token = localStorage.getItem('token');
-//     const role = localStorage.getItem('userRole');
 
-//     if (!token || role !== 'ADMIN') {
-//         // Si no hay token o no es admin, redirigir al login
-//         window.location.href = '../../auth/login.html';
-//     }
-// })();
-
-
-// const getAdminStats = async () => {
-//     const token = localStorage.getItem('token');
-
-//     if (!token) {
-//         window.location.href = '../../auth/login.html';
-//         return;
-//     }
-
-//     try {
-//         const response = await fetch('http://localhost:3000/api/orders/admin/stats', {
-//             method: 'GET',
-//             headers: {
-//                 'Authorization': `Bearer ${token}`,
-//                 'Content-Type': 'application/json'
-//             }
-//         });
-
-//         if (!response.ok) {
-//             // Si el servidor responde 401 o 403, el token no sirve
-//             throw new Error('Sesión inválida');
-//         }
-
-//         const data = await response.json();
-
-//         // Llamamos a la función para pintar los datos
-//         renderDashboard(data);
-
-//     } catch (error) {
-//         console.error('Error al obtener estadísticas:', error);
-//         // Evitamos el alert infinito si falla la carga inicial, 
-//         // pero informamos al usuario si la sesión expiró
-//         if (error.message === 'Sesión inválida') {
-//             alert('Su sesión ha expirado.');
-//             logout();
-//         }
-//     }
-// };
-
-// // Función para actualizar el HTML con los datos de Neon
-// const renderDashboard = (stats) => {
-//     // Formateador de moneda para que se vea profesional ($ 1.234,56)
-//     const formatter = new Intl.NumberFormat('es-AR', {
-//         style: 'currency',
-//         currency: 'ARS',
-//     });
-
-//     // Mapeo directo a los IDs de tu dashboard.html
-//     document.getElementById('total-movido').innerText = formatter.format(stats.totalMovido);
-//     document.getElementById('ganancia-plataforma').innerText = formatter.format(stats.gananciaPlataforma);
-//     document.getElementById('total-pedidos').innerText = stats.totalPedidos;
-// };
-
-// // Función de salida
-// function logout() {
-//     localStorage.removeItem('token');
-//     localStorage.removeItem('userRole');
-//     window.location.href = '../../auth/login.html';
-// }
-
-
-// // const getPendingVehicles = async () => {
-// //     const token = localStorage.getItem('token');
-// //     try {
-// //         const response = await fetch('http://localhost:3000/api/vehicles/pending', {
-// //             headers: { 'Authorization': `Bearer ${token}` }
-// //         });
-// //         const vehicles = await response.json();
-// //         renderVehicleTable(vehicles);
-// //     } catch (error) {
-// //         console.error('Error al cargar flota:', error);
-// //     }
-// // };
-// let todosLosVehiculos = []; // Variable global para guardar la lista original
-
-// // Modificamos tu función que trae los datos
-// const getPendingVehicles = async () => {
-//     const token = localStorage.getItem('token');
-//     try {
-//         const response = await fetch('http://localhost:3000/api/vehicles/pending', {
-//             headers: { 'Authorization': `Bearer ${token}` }
-//         });
-//         const data = await response.json();
-
-//         todosLosVehiculos = data; // Guardamos la copia
-//         renderVehicleTable(data);  // Renderizamos normal
-//     } catch (error) {
-//         console.error('Error:', error);
-//     }
-// };
-
-// // --- LÓGICA DEL BUSCADOR ---
-// // --- LÓGICA DEL BUSCADOR INTELIGENTE ---
-// document.getElementById('buscador-input')?.addEventListener('input', (e) => {
-//     const termino = e.target.value.toLowerCase().trim();
-//     const infoBusqueda = document.getElementById('info-busqueda');
-
-//     // Si el buscador está vacío, mostramos todos y ocultamos el texto de ayuda
-//     if (termino === "") {
-//         infoBusqueda?.classList.add('d-none');
-//         renderVehicleTable(todosLosVehiculos);
-//         return;
-//     }
-
-//     // Filtramos: si el nombre del proveedor O la patente incluyen lo que escribimos
-//     const filtrados = todosLosVehiculos.filter(v => {
-//         const nombreProveedor = v.proveedor?.nombre?.toLowerCase() || "";
-//         const patente = v.patente?.toLowerCase() || "";
-
-//         return nombreProveedor.includes(termino) || patente.includes(termino);
-//     });
-
-//     // Mostramos el texto de "resultados filtrados"
-//     infoBusqueda?.classList.remove('d-none');
-
-//     renderVehicleTable(filtrados);
-// });
-
-// // Función para el botón X
-// window.limpiarBuscador = () => {
-//     const input = document.getElementById('buscador-input');
-//     const infoBusqueda = document.getElementById('info-busqueda');
-//     if (input) {
-//         input.value = '';
-//         infoBusqueda?.classList.add('d-none');
-//         renderVehicleTable(todosLosVehiculos);
-//     }
-// };
-
-
-// const renderVehicleTable = (vehicles) => {
-//     const container = document.getElementById('tabla-vehiculos-container');
-//     if (!container) return;
-
-//     if (vehicles.length === 0) {
-//         container.innerHTML = "<p class='text-muted p-4 text-center'>No hay vehículos pendientes de aprobación.</p>";
-//         return;
-//     }
-
-//     // Iniciamos el contenedor con un grupo de lista para que tenga bordes limpios
-//     let html = `<div class="list-group list-group-flush">`;
-
-//     vehicles.forEach(v => {
-//         html += `
-//             <div class="list-group-item p-4">
-//                 <div class="row align-items-center">
-//                     <div class="col-12 col-md-8">
-//                         <div class="mb-2">
-//                             <span class="badge bg-danger-subtle text-danger border border-danger-subtle mb-2">
-//                                 ${v.tipo_vehiculo}
-//                             </span>
-//                             <h5 class="mb-1 text-dark">${v.modelo}</h5>
-//                             <p class="text-secondary small mb-3">Patente: <span class="fw-bold">${v.patente}</span></p>
-//                         </div>
-                        
-//                         <div class="d-flex align-items-center">
-//                             <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
-//                                 <i class="bi bi-person text-secondary"></i>
-//                             </div>
-//                             <div>
-//                                 <div class="fw-semibold small">${v.proveedor?.nombre || 'S/N'}</div>
-//                                 <div class="text-muted small">${v.proveedor?.email || ''}</div>
-//                             </div>
-//                         </div>
-//                     </div>
-
-//                     <div class="col-12 col-md-4 mt-4 mt-md-0">
-//                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-//                             <button class="btn btn-success px-4" onclick="handleVehicle('${v.id}', true)">
-//                                 <i class="bi bi-check2-circle me-1"></i> Aprobar
-//                             </button>
-//                             <button class="btn btn-outline-danger px-4" onclick="handleVehicle('${v.id}', false)">
-//                                 Rechazar
-//                             </button>
-//                         </div>
-//                     </div>
-//                 </div>
-//             </div>`;
-//     });
-
-//     html += `</div>`;
-//     container.innerHTML = html;
-// };
-
-
-// window.handleVehicle = async (id, habilitar) => {
-//     const token = localStorage.getItem('token');
-//     const accion = habilitar ? 'aprobar' : 'rechazar';
-
-//     if (!confirm(`¿Estás seguro de que quieres ${accion} este vehículo?`)) return;
-
-//     try {
-//         const response = await fetch(`http://localhost:3000/api/vehicles/${id}/status`, {
-//             method: 'PATCH',
-//             headers: {
-//                 'Authorization': `Bearer ${token}`,
-//                 'Content-Type': 'application/json'
-//             },
-//             // Enviamos el booleano que espera el controlador corregido
-//             body: JSON.stringify({ habilitar: habilitar })
-//         });
-
-//         if (response.ok) {
-//             alert(`Vehículo ${habilitar ? 'aprobado' : 'rechazado'} con éxito`);
-//             getPendingVehicles(); // Recargar tabla
-//         }
-//     } catch (error) {
-//         console.error('Error:', error);
-//     }
-// };
-
-// // Actualizamos el DOMContentLoaded para que llame a ambas funciones
-// document.addEventListener('DOMContentLoaded', () => {
-//     getAdminStats();
-//     getPendingVehicles();
-// });
-// // Hacer logout disponible para el botón 'Salir'
-// window.logout = logout;
-
-// // Ejecutar la carga de datos apenas se abre el dashboard
-// document.addEventListener('DOMContentLoaded', getAdminStats);
-
-
-
-
-// 1. Protección de Ruta (Ejecución inmediata)
+// 1. Protección de Ruta
 (function () {
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('userRole');
-
-    if (!token || role !== 'ADMIN') {
-        window.location.href = '../../auth/login.html';
-    }
+    if (!token || role !== 'ADMIN') window.location.href = '../../auth/login.html';
 })();
 
-// Estadísticas del Dashboard
+// Variables de Estado Globales
+let todosLosVehiculos = [];
+let todosLosProveedores = [];
+let vistaActual = 'vehiculos'; // Puede ser 'vehiculos' o 'proveedores'
+
+// --- ESTADÍSTICAS ---
 const getAdminStats = async () => {
     const token = localStorage.getItem('token');
     try {
@@ -267,26 +34,20 @@ const renderDashboard = (stats) => {
     document.getElementById('total-pedidos').innerText = stats.totalPedidos;
 };
 
-// --- GESTIÓN DE FLOTA (LA PARTE QUE FUNCIONABA EXCELENTE) ---
-let todosLosVehiculos = []; 
-
+// --- GESTIÓN DE FLOTA (Vehículos Pendientes) ---
 const getPendingVehicles = async () => {
+    vistaActual = 'vehiculos'; // Cambiamos el estado
+    window.limpiarBuscador(); // Limpiamos el input visualmente
+
     const token = localStorage.getItem('token');
     try {
         const response = await fetch('http://localhost:3000/api/vehicles/pending', {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        
         const data = await response.json();
-
-        // Validamos que sea un array antes de asignar y renderizar
         if (Array.isArray(data)) {
             todosLosVehiculos = data;
             renderVehicleTable(data);
-        } else {
-            console.error("La respuesta no es una lista:", data);
-            document.getElementById('tabla-vehiculos-container').innerHTML = 
-                "<p class='text-center p-4'>No se pudo cargar la lista correctamente.</p>";
         }
     } catch (error) {
         console.error('Error al cargar vehículos:', error);
@@ -295,137 +56,417 @@ const getPendingVehicles = async () => {
 
 const renderVehicleTable = (vehicles) => {
     const container = document.getElementById('tabla-vehiculos-container');
-    if (!container) return;
+    const cardTitle = document.querySelector('.card-header h5');
+    if (cardTitle) cardTitle.innerText = "Vehículos Pendientes de Aprobación";
 
     if (vehicles.length === 0) {
-        container.innerHTML = "<p class='text-muted p-2 text-center small'>No hay vehículos pendientes.</p>";
+        container.innerHTML = "<p class='text-muted p-4 text-center'>No hay vehículos pendientes.</p>";
         return;
     }
 
-    let html = `<div class="list-group list-group-flush border-top shadow-sm">`;
+    // AGREGAMOS 'pb-4' para que siempre haya un margen al final, incluso en móvil
+    let html = `
+        <div class="table-responsive  shadow-sm rounded-bottom">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr class="text-secondary small fw-bold">
+                        <th class="ps-3 border-0">PROVEEDOR / VEHÍCULO</th>
+                        <th class="text-center d-none d-md-table-cell border-0">MODELO / TIPO</th>
+                        <th class="text-center d-none d-md-table-cell border-0">PATENTE</th>
+                        <th class="text-end pe-3 border-0">ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody> 
+    `;
 
     vehicles.forEach(v => {
         const nombre = v.proveedor?.nombre || 'Sin nombre';
-        const contacto = v.proveedor?.telefono || 'S/N';
+        const patente = v.patente || '---';
+        const modelo = v.modelo || 'S/M';
+        const tipo = v.tipo_vehiculo || '';
+
+        const estiloTipo = "text-danger fw-bold text-uppercase";
+        const estiloModelo = "fw-semibold text-dark text-uppercase";
 
         html += `
-            <div class="list-group-item py-2 px-3 border-bottom"> 
-                <div class="row align-items-center g-0">
-                    
-                    <div class="col-4">
-                        <div class="d-flex flex-column" style="line-height: 1.2;">
-                            <span class="fw-bold text-dark" style="font-size: 0.85rem;">${nombre}</span>
-                            <span class="text-muted" style="font-size: 0.7rem;">📞 ${contacto}</span>
+            <tr>
+                <td class="ps-3 border-bottom-0 border-top">
+                    <div class="d-flex flex-column">
+                        <span class="fw-bold text-dark">${nombre}</span>
+                        <div class="d-md-none mt-1">
+                            <span class="${estiloModelo}" style="font-size: 0.8rem;">${modelo}</span>
+                            <span class="text-muted mx-1">•</span>
+                            <span class="${estiloTipo}" style="font-size: 0.7rem;">${tipo}</span>
+                            <div class="mt-1">
+                                <span class="badge bg-light text-dark border fw-normal" style="font-size: 0.7rem;">${patente}</span>
+                            </div>
                         </div>
                     </div>
-
-                    <div class="col-3 text-center">
-                        <div class="d-flex flex-column align-items-center" style="line-height: 1.1;">
-                            <span class="fw-bold text-dark" style="font-size: 0.85rem;">${v.modelo || 'S/M'}</span>
-                            <span class="text-danger fw-bold text-uppercase" style="font-size: 0.6rem; letter-spacing: 0.5px;">
-                                ${v.tipo_vehiculo}
-                            </span>
-                        </div>
+                </td>
+                <td class="text-center d-none d-md-table-cell border-top">
+                    <div class="d-flex flex-column" style="line-height: 1.2;">
+                        <span class="${estiloModelo}" style="font-size: 0.85rem;">${modelo}</span>
+                        <span class="${estiloTipo}" style="font-size: 0.65rem; letter-spacing: 0.5px;">${tipo}</span>
                     </div>
-
-                    <div class="col-3 text-center">
-                         <span class="badge bg-light text-dark border fw-normal" style="font-size: 0.75rem; letter-spacing: 1px;">
-                            ${v.patente}
-                         </span>
+                </td>
+                <td class="text-center d-none d-md-table-cell border-top">
+                    <span class="badge bg-light text-dark border fw-normal" style="font-size: 0.75rem;">${patente}</span>
+                </td>
+                <td class="text-end pe-3 border-top">
+                    <div class="d-flex justify-content-end gap-2">
+                        <button class="btn btn-sm btn-outline-success d-flex align-items-center" onclick="handleVehicle('${v.id}', true)">
+                            <i class="bi bi-check-circle"></i>
+                            <span class="d-none d-md-inline ms-1">Aceptar</span>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger d-flex align-items-center" onclick="handleVehicle('${v.id}', false)">
+                            <i class="bi bi-x-circle"></i>
+                            <span class="d-none d-md-inline ms-1">Rechazar</span>
+                        </button>
                     </div>
-
-                    <div class="col-2 text-end">
-                        <div class="d-flex justify-content-end gap-1">
-                            <button class="btn btn-sm text-success p-1" onclick="handleVehicle('${v.id}', true)" title="Aprobar">
-                                <i class="bi bi-check-circle-fill" style="font-size: 1.1rem;"></i>
-                            </button>
-                            <button class="btn btn-sm text-danger p-1" onclick="handleVehicle('${v.id}', false)" title="Rechazar">
-                                <i class="bi bi-x-circle-fill" style="font-size: 1.1rem;"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                </div>
-            </div>`;
+                </td>
+            </tr>
+        `;
     });
 
-    html += `</div>`;
+    html += `</tbody></table></div>`;
     container.innerHTML = html;
 };
+// --- GESTIÓN DE PROVEEDORES ---
+// const mostrarProveedores = async () => {
+//     vistaActual = 'proveedores'; // Cambiamos el estado
+//     window.limpiarBuscador(); // Limpiamos el input visualmente
 
-window.handleVehicle = async (id, habilitar) => {
+//     const container = document.getElementById('tabla-vehiculos-container');
+//     const token = localStorage.getItem('token');
+//     container.innerHTML = '<div class="text-center p-5"><div class="spinner-border text-primary"></div></div>';
+
+//     try {
+//         const response = await fetch('http://localhost:3000/api/auth/admin/proveedores', {
+//             headers: { 'Authorization': `Bearer ${token}` }
+//         });
+//         const proveedores = await response.json();
+//         todosLosProveedores = proveedores; // Guardamos para el buscador
+//         renderProveedoresTable(proveedores);
+//     } catch (error) {
+//         container.innerHTML = `<div class="alert alert-warning m-3">Error: ${error.message}</div>`;
+//     }
+// };
+
+const mostrarProveedores = async () => {
+    vistaActual = 'proveedores';
+    window.limpiarBuscador();
+
+    const container = document.getElementById('tabla-vehiculos-container');
     const token = localStorage.getItem('token');
-    const accion = habilitar ? 'aprobar' : 'rechazar';
-
-    if (!confirm(`¿Estás seguro de que quieres ${accion} este vehículo?`)) return;
+    container.innerHTML = '<div class="text-center p-5"><div class="spinner-border text-primary"></div></div>';
 
     try {
-        const response = await fetch(`http://localhost:3000/api/vehicles/${id}/status`, {
-            method: 'PATCH',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ habilitar: habilitar })
+        const response = await fetch('http://localhost:3000/api/auth/admin/proveedores', {
+            headers: { 'Authorization': `Bearer ${token}` }
         });
 
-        if (response.ok) {
-            alert(`Vehículo ${habilitar ? 'aprobado' : 'rechazado'} con éxito`);
-            getPendingVehicles(); 
+        // Si el servidor devuelve error, lanzamos excepción
+        if (!response.ok) {
+            throw new Error(`Error del servidor (${response.status})`);
+        }
+
+        const proveedores = await response.json();
+
+        // Validamos que sea un array antes de usarlo
+        if (Array.isArray(proveedores)) {
+            todosLosProveedores = proveedores;
+            renderProveedoresTable(proveedores);
+        } else {
+            console.error("Respuesta inesperada del servidor:", proveedores);
+            container.innerHTML = `<div class="alert alert-warning m-3">Error al cargar proveedores.</div>`;
         }
     } catch (error) {
-        console.error('Error al actualizar:', error);
+        console.error("Error en mostrarProveedores:", error);
+        container.innerHTML = `<div class="alert alert-danger m-3">Error: ${error.message}</div>`;
     }
 };
 
-//buscador
-// --- LÓGICA DEL BUSCADOR EN admin-dashboard.js ---
-document.getElementById('buscador-input')?.addEventListener('input', (e) => {
-    const termino = e.target.value.toLowerCase().trim();
-    
-    if (termino === "") {
-        renderVehicleTable(todosLosVehiculos);
+
+const renderProveedoresTable = (proveedores) => {
+    const container = document.getElementById('tabla-vehiculos-container');
+    const cardTitle = document.querySelector('.card-header h5');
+    if (cardTitle) cardTitle.innerText = "Listado de Proveedores Activos";
+
+    if (proveedores.length === 0) {
+        container.innerHTML = "<p class='text-muted p-4 text-center'>No hay proveedores.</p>";
         return;
     }
 
-    const filtrados = todosLosVehiculos.filter(v => {
-        // Sacamos los datos de forma segura para que no rompa si algo es null
-        const nombreProveedor = v.proveedor?.nombre?.toLowerCase() || "";
-        const patente = v.patente?.toLowerCase() || "";
-        const modelo = v.modelo?.toLowerCase() || "";
+    let html = `
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr class="text-secondary small fw-bold">
+                        <th class="ps-3 border-0">PROVEEDOR / DETALLES</th>
+                        <th class="d-none d-md-table-cell border-0">D.N.I</th>
+                        <th class="text-center d-none d-md-table-cell border-0">FLOTA</th>
+                        <th class="text-end pe-3 border-0">ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
 
-        // Retorna true si el término coincide con nombre, patente o modelo
-        return nombreProveedor.includes(termino) || 
-               patente.includes(termino) || 
-               modelo.includes(termino);
+    proveedores.forEach(prov => {
+        const flotaCount = prov.vehiculos?.length || 0;
+        const dni = prov.dni || '---';
+
+        html += `
+            <tr>
+                <td class="ps-3">
+            <div class="d-flex align-items-center">
+                <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center me-2 d-none d-sm-flex" style="width: 32px; height: 32px; flex-shrink:0;">
+                    ${prov.nombre.charAt(0).toUpperCase()}
+                </div>
+                
+                <div class="d-flex flex-column">
+                    <span class="fw-bold text-dark">${prov.nombre}</span>
+                    
+                    <div class="d-md-none small mt-1 d-flex align-items-center">
+                        
+                        <div style="width: 100px;" class="text-secondary flex-shrink-0">
+                            <i class="bi bi-card-text me-1"></i>${dni}
+                        </div>
+                        
+                        <div class="ms-2">
+                            <span class="badge rounded-pill bg-info-subtle text-info border border-info-subtle" style="font-size: 0.7rem;">
+                                <i class="bi bi-truck me-1"></i>${flotaCount}
+                            </span>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        
+                </td>
+
+                <td class="d-none d-md-table-cell text-secondary">${dni}</td>
+                <td class="text-center d-none d-md-table-cell">
+                    <span class="badge rounded-pill bg-info-subtle text-info border border-info-subtle">
+                        ${flotaCount} móviles
+                    </span>
+                </td>
+
+                <td class="text-end pe-3">
+                    <div class="d-flex justify-content-end gap-2">
+                        <button class="btn btn-sm btn-outline-primary d-flex align-items-center" onclick="verDetalles('${prov.id}')">
+                            <i class="bi bi-person-lines-fill"></i>
+                            <span class="d-none d-md-inline ms-1">Detalles</span>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger d-flex align-items-center" onclick="eliminarProv('${prov.id}')">
+                            <i class="bi bi-trash3"></i>
+                            <span class="d-none d-md-inline ms-1">Eliminar</span>
+                        </button>
+                    </div>
+                </td>
+            </tr>`;
     });
+    container.innerHTML = html + `</tbody></table></div>`;
+};
+// --- LÓGICA UNIFICADA DEL BUSCADOR ---
+document.getElementById('buscador-input')?.addEventListener('input', (e) => {
+    const termino = e.target.value.toLowerCase().trim();
 
-    renderVehicleTable(filtrados);
+    if (vistaActual === 'vehiculos') {
+        if (termino === "") return renderVehicleTable(todosLosVehiculos);
+        const filtrados = todosLosVehiculos.filter(v =>
+            v.proveedor?.nombre?.toLowerCase().includes(termino) ||
+            v.patente?.toLowerCase().includes(termino) ||
+            v.modelo?.toLowerCase().includes(termino)
+        );
+        renderVehicleTable(filtrados);
+    } else {
+        if (termino === "") return renderProveedoresTable(todosLosProveedores);
+        const filtrados = todosLosProveedores.filter(p =>
+            p.nombre?.toLowerCase().includes(termino) ||
+            p.dni?.includes(termino) ||
+            p.telefono?.includes(termino)
+        );
+        renderProveedoresTable(filtrados);
+    }
 });
-// Función para limpiar el buscador y resetear la tabla
+
+
+
+window.verDetalles = (id) => {
+    const proveedor = todosLosProveedores.find(p => p.id === id);
+    if (proveedor) {
+        renderDetallesProveedor(proveedor);
+    } else {
+        console.error("No se encontró el proveedor con ID:", id);
+    }
+};
+// Función para limpiar el buscador
 window.limpiarBuscador = () => {
     const input = document.getElementById('buscador-input');
-    
     if (input) {
-        input.value = ''; // Vacía el texto del input
-        
-        // Disparamos manualmente el evento 'input' para que la lógica 
-        // que ya tenés escrita detecte que está vacío y resetee la tabla
-        input.dispatchEvent(new Event('input')); 
-        
-        // Opcional: devolver el foco al buscador
-        input.focus();
+        input.value = '';
+        // No disparamos el evento input aquí para evitar bucles, 
+        // simplemente dejamos el campo vacío.
     }
 };
 
-function logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('userRole');
+// --- UTILIDADES ---
+window.handleVehicle = async (id, habilitar) => {
+    const token = localStorage.getItem('token');
+    try {
+        const response = await fetch(`http://localhost:3000/api/vehicles/${id}/status`, {
+            method: 'PATCH',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ habilitar })
+        });
+        if (response.ok) getPendingVehicles();
+    } catch (error) { console.error(error); }
+};
+
+const logout = () => {
+    localStorage.clear();
     window.location.href = '../../auth/login.html';
-}
+};
 
 window.logout = logout;
+window.mostrarProveedores = mostrarProveedores;
+window.getPendingVehicles = getPendingVehicles;
 
+
+
+const renderDetallesProveedor = (proveedor) => {
+    const container = document.getElementById('tabla-vehiculos-container');
+
+    // Cambiamos el título de la card principal
+    const cardTitle = document.querySelector('.card-header h5');
+    if (cardTitle) cardTitle.innerText = `Expediente: ${proveedor.nombre}`;
+
+    let html = `
+        <div class="p-3 mb-5">
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-3">
+        <h6 class="mb-0 text-primary"><i class="bi bi-person-badge me-2"></i>Datos Personales</h6>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-6 col-md-3">
+                <label class="text-muted small d-block">Nombre Completo</label>
+                <span class="fw-bold">${proveedor.nombre || proveedor.name || 'Sin nombre'}</span>
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="text-muted small d-block">D.N.I / CUIL</label>
+                <span class="fw-bold">${proveedor.dni || '---'}</span>
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="text-muted small d-block">Teléfono</label>
+                <span class="fw-bold text-success">
+                    <i class="bi bi-whatsapp me-1"></i>${proveedor.telefono || proveedor.phone || '---'}
+                </span>
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="text-muted small d-block">Fecha de Alta</label>
+                <span class="fw-bold">
+    ${proveedor.fechaCreacion ? new Date(proveedor.fechaCreacion).toLocaleString('es-AR') : '---'}            </div>
+        </div>
+    </div>
+</div>
+
+       
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 text-primary"><i class="bi bi-truck me-2"></i>Flota de Vehículos</h6>
+                <span class="badge bg-primary-subtle text-primary rounded-pill">
+                    ${proveedor.vehiculos?.length || 0} unidades
+                </span>
+            </div>
+            
+            <div class="card-body p-2 p-md-0"> <!-- Padding reducido en mobile para las cards -->
+                
+                <!-- VISTA DESKTOP: Tabla tradicional -->
+                <div class="table-responsive d-none d-md-block">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light small fw-bold">
+                            <tr>
+                                <th class="ps-3">MODELO / PATENTE</th>
+                                <th class="text-center">TIPO / ESTADO</th>
+                                <th class="text-center">CAPACIDAD</th>
+                                <th class="text-center">FECHA GESTIÓN</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${proveedor.vehiculos?.map(v => `
+                                <tr>
+                                    <td class="ps-3">
+                                        <div class="fw-bold text-dark">${v.modelo || 'Sin modelo'}</div>
+                                        <div class="badge bg-light text-dark border fw-normal" style="font-size: 0.7rem;">
+                                            ${v.patente || '---'}
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="d-flex flex-column align-items-center">
+                                            <span class="fw-bold text-uppercase small">${v.tipo_vehiculo || '---'}</span>
+                                            <span class="badge ${v.estaHabilitado ? 'bg-success' : 'bg-warning text-dark'} mt-1">
+                                                ${v.estaHabilitado ? 'APROBADO' : 'PENDIENTE'}
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td class="text-center small text-muted">
+                                        ${v.capacidadPeso || 0} kg / ${v.capacidadVol || 0} m³
+                                    </td>
+                                    <td class="text-center small text-muted">
+                                        ${v.updatedAt ? new Date(v.updatedAt).toLocaleDateString('es-AR') : 'Pendiente'}
+                                    </td>
+                                </tr>
+                            `).join('') || '<tr><td colspan="4" class="text-center p-3">No hay vehículos</td></tr>'}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- VISTA MOBILE: Cards individuales -->
+                <div class="d-md-none">
+                    ${proveedor.vehiculos?.map(v => `
+                        <div class="card border shadow-sm mb-3 mx-2">
+                            <div class="card-body p-3">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div>
+                                        <h6 class="fw-bold mb-1 text-uppercase">${v.modelo || 'Sin modelo'}</h6>
+                                        <span class="badge bg-light text-dark border fw-normal">${v.patente || '---'}</span>
+                                    </div>
+                                    <span class="badge ${v.estaHabilitado ? 'bg-success' : 'bg-warning text-dark'} shadow-sm">
+                                        ${v.estaHabilitado ? 'APROBADO' : 'PENDIENTE'}
+                                    </span>
+                                </div>
+                                
+                                <div class="row g-2 border-top pt-3">
+                                    <div class="col-6">
+                                        <label class="text-muted d-block mb-1" style="font-size: 0.65rem; letter-spacing: 0.5px;">TIPO</label>
+                                        <span class="fw-bold small text-uppercase">${v.tipo_vehiculo || '---'}</span>
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="text-muted d-block mb-1" style="font-size: 0.65rem; letter-spacing: 0.5px;">CAPACIDAD</label>
+                                        <span class="small fw-semibold">${v.capacidadPeso || 0}kg / ${v.capacidadVol || 0}m³</span>
+                                    </div>
+                                    <div class="col-12 mt-3 bg-light rounded p-2 d-flex align-items-center">
+                                        <i class="bi bi-calendar3 text-primary me-2"></i>
+                                        <div>
+                                            <label class="text-muted d-block" style="font-size: 0.6rem; line-height: 1;">ÚLTIMA GESTIÓN</label>
+                                            <span class="small" style="font-size: 0.75rem;">
+                                                ${v.updatedAt ? new Date(v.updatedAt).toLocaleString('es-AR') : 'Pendiente de revisión'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('') || '<p class="text-center text-muted p-4">No hay vehículos registrados</p>'}
+                </div>
+
+            </div>
+        </div>
+    `;
+
+    container.innerHTML = html;
+};
 document.addEventListener('DOMContentLoaded', () => {
     getAdminStats();
     getPendingVehicles();

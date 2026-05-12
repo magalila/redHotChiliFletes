@@ -1,33 +1,7 @@
 import type { Request, Response } from 'express';
 import db from '../db.js';
 import { OrderStatus } from '@prisma/client';
-// export const createOrder = async (req: Request, res: Response) => {
-//     // Ya no extraemos clienteId de req.body
-//     const { tipo, paradas, distanciaTotal, precioTotal } = req.body;
-//     // Lo tomamos de lo que inyectó el middleware
-//     const clienteId = (req as any).userId;
 
-//     try {
-//         const newOrder = await db.order.create({
-//             data: {
-//                 tipo,
-//                 clienteId, // Viene del Token, es 100% seguro
-//                 distanciaTotal,
-//                 precioTotal,
-//                 comisionApp: precioTotal * 0.15,
-//                 paradas: {
-//                     create: paradas
-//                 }
-//             },
-//             include: { paradas: true }
-//         });
-
-//         res.status(201).json({ mensaje: 'Pedido creado con éxito', pedido: newOrder });
-//     } catch (error) {
-//         console.error(error);
-//         res.status(400).json({ error: 'Error al crear el pedido' });
-//     }
-// };
 export const createOrder = async (req: Request, res: Response) => {
     const { tipo, paradas, distanciaTotal, precioTotal } = req.body;
     const clienteId = (req as any).userId;
@@ -41,14 +15,13 @@ export const createOrder = async (req: Request, res: Response) => {
                 precioTotal,
                 comisionApp: precioTotal * 0.15,
                 // MAPEO DE PARADAS: 
-                // Aseguramos que los nombres del JSON coincidan con Prisma
                 paradas: {
                     create: paradas.map((p: any) => ({
                         direccion: p.direccion,
                         lat: p.lat,
                         lng: p.lng,
-                        ordenVisita: p.ordenVisita, // Antes tenías 'orden'
-                        esEntrega: p.esEntrega      // Antes tenías 'tipo'
+                        ordenVisita: p.ordenVisita,
+                        esEntrega: p.esEntrega      
                     }))
                 }
             },
@@ -155,30 +128,6 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
     }
 };
 
-export const getProviderOrders = async (req: Request, res: Response) => {
-    // El ID lo tomamos del token inyectado por el middleware
-    const proveedorId = (req as any).userId;
-
-    try {
-        const orders = await db.order.findMany({
-            where: {
-                proveedorId: proveedorId
-            },
-            include: {
-                paradas: true,
-                cliente: { select: { nombre: true } }
-            },
-            orderBy: {
-                createdAt: 'desc'
-            }
-        });
-
-        res.json(orders);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Error al obtener tu historial de trabajos' });
-    }
-};
 
 
 export const getAdminStats = async (req: Request, res: Response) => {
@@ -203,7 +152,7 @@ export const getAdminStats = async (req: Request, res: Response) => {
         res.json({
             totalMovido: stats._sum.precioTotal || 0,
             gananciaPlataforma: stats._sum.comisionApp || 0,
-            totalPedidos: stats._count.id, // Nombre alineado con el HTML
+            totalPedidos: stats._count.id, 
             pedidosCompletados: pedidosFinalizados
         });
     } catch (error) {
@@ -213,24 +162,8 @@ export const getAdminStats = async (req: Request, res: Response) => {
 };
 
 
-
-// En tu controlador de vehículos
-// export const getPendingVehicles = async (req: Request, res: Response) => {
-//     try {
-//         const vehicles = await db.vehicle.findMany({
-//             where: { estaHabilitado: false },
-//             include: {
-//                 proveedor: true // <--- ¡ESTO ES LO QUE TE FALTA PARA QUE APAREZCA EL NOMBRE!
-//             }
-//         });
-//         res.json(vehicles);
-//     } catch (error) {
-//         res.status(500).json({ error: 'Error al obtener flota' });
-//     }
-// };
-// En tu controlador de vehículos
-// En orderController.ts
 export const getPendingVehicles = async (req: Request, res: Response) => {
+        console.log("Ejecutando getPendingVehicles desde vehicleController.ts ✅");
     try {
         const vehicles = await db.vehicle.findMany({
             where: { estaHabilitado: false },
@@ -240,11 +173,13 @@ export const getPendingVehicles = async (req: Request, res: Response) => {
                         id: true,
                         nombre: true,
                         email: true,
-                        telefono: true // <-- ESTO OBLIGA A PRISMA A TRAERLO
+                        telefono: true,
+                        // fechaCreacion:true,
                     }
                 }
             }
         });
+console.log("Vehículos completos:", JSON.stringify(vehicles, null, 2));
 
         // Agregá este log para ver en la terminal de VS Code si el servidor lo tiene
         console.log("DATOS DESDE BD:", JSON.stringify(vehicles[0]?.proveedor, null, 2));
@@ -275,3 +210,20 @@ export const updateVehicleStatus = async (req: Request, res: Response) => {
         res.status(400).json({ error: 'No se pudo actualizar el vehículo' });
     }
 };
+
+
+export const getProveedoresActivos = async (req: Request, res: Response) => {
+  try {
+    const proveedores = await db.user.findMany({
+  where: { rol: 'PROVEEDOR' },
+  include: { vehiculos: true }
+});
+
+
+    res.json(proveedores);
+  } catch (error) {
+    console.error("Error detallado en getProveedoresActivos:", error);
+    res.status(500).json({ error: 'Error al obtener proveedores', detalle: error });
+  }
+};
+
