@@ -22,19 +22,24 @@ model User {
 
 }
 
+
+
 model Vehicle {
-  id             String            @id @default(uuid())
+  id             String   @id @default(uuid())
   id_proveedor   String
   tipo_vehiculo  String
-  patente        String            @unique
+  patente        String   @unique
   modelo         String?
   capacidadVol   Float
   capacidadPeso  Float
-  estaHabilitado Boolean           @default(false)
-  orders         Order[]
-  proveedor      User              @relation(fields: [id_proveedor], references: [id])
+  estado         String   @default("PENDIENTE") // ← cambiar de EstadoVehiculo a String
+  fechaGestion   DateTime?
+  proveedor      User     @relation(fields: [id_proveedor], references: [id])
   documentos     VehicleDocument[]
+  orders         Order[]
 }
+
+
 
 model VehicleDocument {
   id               String    @id @default(uuid())

@@ -1,7 +1,6 @@
 import type { Request, Response } from 'express';
 import db from '../db.js';
 import { OrderStatus } from '@prisma/client';
-
 export const createOrder = async (req: Request, res: Response) => {
     const { tipo, paradas, distanciaTotal, precioTotal } = req.body;
     const clienteId = (req as any).userId;
@@ -21,7 +20,7 @@ export const createOrder = async (req: Request, res: Response) => {
                         lat: p.lat,
                         lng: p.lng,
                         ordenVisita: p.ordenVisita,
-                        esEntrega: p.esEntrega      
+                        esEntrega: p.esEntrega
                     }))
                 }
             },
@@ -152,7 +151,7 @@ export const getAdminStats = async (req: Request, res: Response) => {
         res.json({
             totalMovido: stats._sum.precioTotal || 0,
             gananciaPlataforma: stats._sum.comisionApp || 0,
-            totalPedidos: stats._count.id, 
+            totalPedidos: stats._count.id,
             pedidosCompletados: pedidosFinalizados
         });
     } catch (error) {
@@ -163,10 +162,10 @@ export const getAdminStats = async (req: Request, res: Response) => {
 
 
 export const getPendingVehicles = async (req: Request, res: Response) => {
-        console.log("Ejecutando getPendingVehicles desde vehicleController.ts ✅");
+    console.log("Ejecutando getPendingVehicles desde vehicleController.ts ✅");
     try {
         const vehicles = await db.vehicle.findMany({
-            where: { estaHabilitado: false },
+            where: { estado: "PENDIENTE" }, // ✅ solo los que esperan aprobación
             include: {
                 proveedor: {
                     select: {
@@ -174,56 +173,97 @@ export const getPendingVehicles = async (req: Request, res: Response) => {
                         nombre: true,
                         email: true,
                         telefono: true,
-                        // fechaCreacion:true,
                     }
                 }
             }
         });
-console.log("Vehículos completos:", JSON.stringify(vehicles, null, 2));
 
-        // Agregá este log para ver en la terminal de VS Code si el servidor lo tiene
-        console.log("DATOS DESDE BD:", JSON.stringify(vehicles[0]?.proveedor, null, 2));
-
+        console.log("Vehículos completos:", JSON.stringify(vehicles, null, 2));
         res.json(vehicles);
     } catch (error) {
         res.status(500).json({ error: 'Error al obtener flota' });
     }
 };
-export const updateVehicleStatus = async (req: Request, res: Response) => {
-    // Línea 239: Solucionamos el error 'string | string[]' asegurando que es string
-    const id = req.params.id as string; 
-    
-    // Suponiendo que el Admin envía un booleano para habilitar/deshabilitar
-    const { habilitar } = req.body; 
 
+
+
+
+// export const updateVehicleStatus = async (req: Request, res: Response) => {
+//   try {
+//     const id = req.params.id as string;
+//     const { accion } = req.body; // Recibimos "APROBAR" o "RECHAZAR" desde el frontend
+
+//     console.log(`Gestionando vehículo ${id}. Acción: ${accion}`);
+
+//     // Determinar nuevo estado según la acción
+//     let nuevoEstado = "PENDIENTE";
+//     if (accion === "APROBAR") nuevoEstado = "APROBADO";
+//     if (accion === "RECHAZAR") nuevoEstado = "RECHAZADO";
+
+//     const vehicle = await db.vehicle.update({
+//       where: { id },
+//       data: {
+//         estado: nuevoEstado,
+//         fechaGestion: new Date()
+//       }
+//     });
+
+//     res.json({
+//       mensaje: `Vehículo ${nuevoEstado.toLowerCase()}`,
+//       vehicle
+//     });
+//   } catch (error) {
+//     console.error("Error en updateVehicleStatus:", error);
+//     res.status(500).json({ error: "Error al actualizar estado del vehículo" });
+//   }
+// };
+
+
+export const updateVehicleStatus = async (req: Request, res: Response) => {
     try {
-        await db.vehicle.update({
-            where: { id: id },
-            data: { 
-                // Línea 240: Cambiamos 'estado' por 'estaHabilitado'
-                estaHabilitado: habilitar 
-            }
+        const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+        const { accion } = req.body;
+
+        const nuevoEstado =
+            accion === 'APROBAR'
+                ? "APROBADO"
+                : accion === 'RECHAZAR'
+                    ? "RECHAZADO"
+                    : "PENDIENTE";
+
+
+        const vehicle = await db.vehicle.update({
+            where: { id },
+            data: {
+                estado: nuevoEstado,
+                fechaGestion: new Date(),
+            },
         });
-        res.json({ mensaje: 'Estado del vehículo actualizado con éxito' });
+
+        res.json({
+            mensaje: `Vehículo ${nuevoEstado.toLowerCase()}`,
+            vehicle,
+        });
     } catch (error) {
-        console.error(error);
-        res.status(400).json({ error: 'No se pudo actualizar el vehículo' });
+        console.error('Error en updateVehicleStatus:', error);
+        res.status(500).json({ error: 'Error al actualizar estado del vehículo' });
     }
 };
 
 
+
 export const getProveedoresActivos = async (req: Request, res: Response) => {
-  try {
-    const proveedores = await db.user.findMany({
-  where: { rol: 'PROVEEDOR' },
-  include: { vehiculos: true }
-});
+    try {
+        const proveedores = await db.user.findMany({
+            where: { rol: 'PROVEEDOR' },
+            include: { vehiculos: true }
+        });
 
 
-    res.json(proveedores);
-  } catch (error) {
-    console.error("Error detallado en getProveedoresActivos:", error);
-    res.status(500).json({ error: 'Error al obtener proveedores', detalle: error });
-  }
+        res.json(proveedores);
+    } catch (error) {
+        console.error("Error detallado en getProveedoresActivos:", error);
+        res.status(500).json({ error: 'Error al obtener proveedores', detalle: error });
+    }
 };
 

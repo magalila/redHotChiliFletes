@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const nombre = urlParams.get('nombre');
 
     if (nombre) document.getElementById('nombre-proveedor').innerText = `Flota de ${nombre}`;
-    
+
     if (proveedorId) {
         cargarVehiculosProveedor(proveedorId);
     }
@@ -33,19 +33,29 @@ function renderFlota(vehiculos) {
 
     let html = '';
     vehiculos.forEach(v => {
-        const statusText = v.estaHabilitado ? 'APROBADO' : 'PENDIENTE/RECHAZADO';
-        const statusClass = v.estaHabilitado ? 'bg-success' : 'bg-warning text-dark';
+        const statusText = v.estado; // directamente el valor: "PENDIENTE", "APROBADO", "RECHAZADO"
+        let statusClass = 'bg-warning text-dark';
+        let borderClass = 'border-warning';
+
+        if (v.estado === 'APROBADO') {
+            statusClass = 'bg-success';
+            borderClass = 'border-success';
+        } else if (v.estado === 'RECHAZADO') {
+            statusClass = 'bg-danger';
+            borderClass = 'border-danger';
+        }
 
         html += `
-            <div class="card mb-3 border-0 shadow-sm border-start border-4 ${v.estaHabilitado ? 'border-success' : 'border-warning'}">
-                <div class="card-body d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="badge ${statusClass} mb-2">${statusText}</span>
-                        <h5>${v.modelo}</h5>
-                        <p class="mb-0 text-muted small">Patente: <strong>${v.patente}</strong> | Tipo: ${v.tipo_vehiculo}</p>
-                    </div>
-                </div>
-            </div>`;
+  <div class="card mb-3 border-0 shadow-sm border-start border-4 ${borderClass}">
+    <div class="card-body d-flex justify-content-between align-items-center">
+      <div>
+        <span class="badge ${statusClass} mb-2">${statusText}</span>
+        <h5>${v.modelo}</h5>
+        <p class="mb-0 text-muted small">Patente: <strong>${v.patente}</strong> | Tipo: ${v.tipo_vehiculo}</p>
+      </div>
+    </div>
+  </div>`;
+
     });
     container.innerHTML = html;
 }
@@ -53,13 +63,18 @@ function renderFlota(vehiculos) {
 // Función de filtrado por estado
 window.filtrarFlota = (estado) => {
     let filtrados = [];
-    if (estado === 'todos') filtrados = flotaOriginal;
-    else if (estado === 'aprobados') filtrados = flotaOriginal.filter(v => v.estaHabilitado);
-    else if (estado === 'rechazados') filtrados = flotaOriginal.filter(v => !v.estaHabilitado);
-    
+    if (estado === 'todos') {
+        filtrados = flotaOriginal;
+    } else if (estado === 'aprobados') {
+        filtrados = flotaOriginal.filter(v => v.estado === 'APROBADO');
+    } else if (estado === 'rechazados') {
+        filtrados = flotaOriginal.filter(v => v.estado === 'RECHAZADO');
+    } else if (estado === 'pendientes') {
+        filtrados = flotaOriginal.filter(v => v.estado === 'PENDIENTE');
+    }
+
     renderFlota(filtrados);
-    
-    // Cambiar estado activo de los botones (opcional)
+
     document.querySelectorAll('.btn-group .btn').forEach(btn => btn.classList.remove('active'));
     event.target.classList.add('active');
 };

@@ -35,7 +35,8 @@ CREATE TABLE "Vehicle" (
     "modelo" TEXT,
     "capacidadVol" DOUBLE PRECISION NOT NULL,
     "capacidadPeso" DOUBLE PRECISION NOT NULL,
-    "estaHabilitado" BOOLEAN NOT NULL DEFAULT false,
+    "estado" TEXT NOT NULL DEFAULT 'PENDIENTE',
+    "fechaGestion" TIMESTAMP,
 
     CONSTRAINT "Vehicle_pkey" PRIMARY KEY ("id")
 );

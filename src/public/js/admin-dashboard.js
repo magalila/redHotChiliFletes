@@ -37,6 +37,7 @@ const renderDashboard = (stats) => {
 // --- GESTIÓN DE FLOTA (Vehículos Pendientes) ---
 const getPendingVehicles = async () => {
     vistaActual = 'vehiculos'; // Cambiamos el estado
+    localStorage.setItem("vistaActual", vistaActual); // Guardamos la vista
     window.limpiarBuscador(); // Limpiamos el input visualmente
 
     const token = localStorage.getItem('token');
@@ -57,14 +58,15 @@ const getPendingVehicles = async () => {
 const renderVehicleTable = (vehicles) => {
     const container = document.getElementById('tabla-vehiculos-container');
     const cardTitle = document.querySelector('.card-header h5');
-    if (cardTitle) cardTitle.innerText = "Vehículos Pendientes de Aprobación";
+    if (cardTitle && vehicles.length > 0) {
+        cardTitle.innerText = "Gestión de Flota Pendiente";
+    }
 
     if (vehicles.length === 0) {
         container.innerHTML = "<p class='text-muted p-4 text-center'>No hay vehículos pendientes.</p>";
         return;
     }
 
-    // AGREGAMOS 'pb-4' para que siempre haya un margen al final, incluso en móvil
     let html = `
         <div class="table-responsive  shadow-sm rounded-bottom">
             <table class="table table-hover align-middle mb-0">
@@ -121,7 +123,7 @@ const renderVehicleTable = (vehicles) => {
                         <button class="btn btn-sm btn-outline-danger d-flex align-items-center" onclick="handleVehicle('${v.id}', false)">
                             <i class="bi bi-x-circle"></i>
                             <span class="d-none d-md-inline ms-1">Rechazar</span>
-                        </button>
+                        </button>   
                     </div>
                 </td>
             </tr>
@@ -131,29 +133,12 @@ const renderVehicleTable = (vehicles) => {
     html += `</tbody></table></div>`;
     container.innerHTML = html;
 };
-// --- GESTIÓN DE PROVEEDORES ---
-// const mostrarProveedores = async () => {
-//     vistaActual = 'proveedores'; // Cambiamos el estado
-//     window.limpiarBuscador(); // Limpiamos el input visualmente
 
-//     const container = document.getElementById('tabla-vehiculos-container');
-//     const token = localStorage.getItem('token');
-//     container.innerHTML = '<div class="text-center p-5"><div class="spinner-border text-primary"></div></div>';
 
-//     try {
-//         const response = await fetch('http://localhost:3000/api/auth/admin/proveedores', {
-//             headers: { 'Authorization': `Bearer ${token}` }
-//         });
-//         const proveedores = await response.json();
-//         todosLosProveedores = proveedores; // Guardamos para el buscador
-//         renderProveedoresTable(proveedores);
-//     } catch (error) {
-//         container.innerHTML = `<div class="alert alert-warning m-3">Error: ${error.message}</div>`;
-//     }
-// };
 
 const mostrarProveedores = async () => {
     vistaActual = 'proveedores';
+    localStorage.setItem("vistaActual", vistaActual);
     window.limpiarBuscador();
 
     const container = document.getElementById('tabla-vehiculos-container');
@@ -164,28 +149,18 @@ const mostrarProveedores = async () => {
         const response = await fetch('http://localhost:3000/api/auth/admin/proveedores', {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-
-        // Si el servidor devuelve error, lanzamos excepción
-        if (!response.ok) {
-            throw new Error(`Error del servidor (${response.status})`);
-        }
-
+        if (!response.ok) throw new Error(`Error del servidor (${response.status})`);
         const proveedores = await response.json();
-
-        // Validamos que sea un array antes de usarlo
         if (Array.isArray(proveedores)) {
             todosLosProveedores = proveedores;
             renderProveedoresTable(proveedores);
         } else {
-            console.error("Respuesta inesperada del servidor:", proveedores);
             container.innerHTML = `<div class="alert alert-warning m-3">Error al cargar proveedores.</div>`;
         }
     } catch (error) {
-        console.error("Error en mostrarProveedores:", error);
         container.innerHTML = `<div class="alert alert-danger m-3">Error: ${error.message}</div>`;
     }
 };
-
 
 const renderProveedoresTable = (proveedores) => {
     const container = document.getElementById('tabla-vehiculos-container');
@@ -268,6 +243,7 @@ const renderProveedoresTable = (proveedores) => {
     container.innerHTML = html + `</tbody></table></div>`;
 };
 // --- LÓGICA UNIFICADA DEL BUSCADOR ---
+
 document.getElementById('buscador-input')?.addEventListener('input', (e) => {
     const termino = e.target.value.toLowerCase().trim();
 
@@ -279,7 +255,8 @@ document.getElementById('buscador-input')?.addEventListener('input', (e) => {
             v.modelo?.toLowerCase().includes(termino)
         );
         renderVehicleTable(filtrados);
-    } else {
+
+    } else if (vistaActual === 'proveedores') {
         if (termino === "") return renderProveedoresTable(todosLosProveedores);
         const filtrados = todosLosProveedores.filter(p =>
             p.nombre?.toLowerCase().includes(termino) ||
@@ -287,17 +264,42 @@ document.getElementById('buscador-input')?.addEventListener('input', (e) => {
             p.telefono?.includes(termino)
         );
         renderProveedoresTable(filtrados);
+
+    } else if (vistaActual === 'detalles') {
+        const id = localStorage.getItem("proveedorId");
+        const proveedor = todosLosProveedores.find(p => p.id === id);
+        if (!proveedor) return;
+
+        let vehiculos = proveedor.vehiculos || [];
+        if (termino !== "") {
+            vehiculos = vehiculos.filter(v =>
+                v.patente?.toLowerCase().includes(termino) ||
+                v.modelo?.toLowerCase().includes(termino) ||
+                v.tipo_vehiculo?.toLowerCase().includes(termino)
+            );
+        }
+
+        const proveedorFiltrado = { ...proveedor, vehiculos };
+        renderDetallesProveedor(proveedorFiltrado);
     }
 });
+
+window.irHome = () => {
+    vistaActual = 'vehiculos';
+    localStorage.removeItem("vistaActual");
+    localStorage.removeItem("proveedorId");
+    getPendingVehicles();
+};
 
 
 
 window.verDetalles = (id) => {
     const proveedor = todosLosProveedores.find(p => p.id === id);
     if (proveedor) {
+        vistaActual = 'detalles';
+        localStorage.setItem("vistaActual", vistaActual);
+        localStorage.setItem("proveedorId", id);
         renderDetallesProveedor(proveedor);
-    } else {
-        console.error("No se encontró el proveedor con ID:", id);
     }
 };
 // Función para limpiar el buscador
@@ -305,23 +307,38 @@ window.limpiarBuscador = () => {
     const input = document.getElementById('buscador-input');
     if (input) {
         input.value = '';
-        // No disparamos el evento input aquí para evitar bucles, 
-        // simplemente dejamos el campo vacío.
     }
 };
 
 // --- UTILIDADES ---
+// window.handleVehicle = async (id, habilitar) => {
+//     const token = localStorage.getItem('token');
+//     try {
+//         const response = await fetch(`http://localhost:3000/api/vehicles/${id}/status`, {
+//             method: 'PATCH',
+//             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+//             body: JSON.stringify({ habilitar })
+//         });
+//         if (response.ok) getPendingVehicles();
+//     } catch (error) { console.error(error); }
+// };
 window.handleVehicle = async (id, habilitar) => {
-    const token = localStorage.getItem('token');
-    try {
-        const response = await fetch(`http://localhost:3000/api/vehicles/${id}/status`, {
-            method: 'PATCH',
-            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ habilitar })
-        });
-        if (response.ok) getPendingVehicles();
-    } catch (error) { console.error(error); }
+  const token = localStorage.getItem('token');
+  const accion = habilitar ? "APROBAR" : "RECHAZAR";
+  try {
+    const response = await fetch(`http://localhost:3000/api/vehicles/${id}/status`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ accion }) // 👈 ahora enviamos la acción
+    });
+    if (response.ok) getPendingVehicles();
+  } catch (error) { console.error(error); }
 };
+
+
 
 const logout = () => {
     localStorage.clear();
@@ -405,16 +422,18 @@ const renderDetallesProveedor = (proveedor) => {
                                     <td class="text-center">
                                         <div class="d-flex flex-column align-items-center">
                                             <span class="fw-bold text-uppercase small">${v.tipo_vehiculo || '---'}</span>
-                                            <span class="badge ${v.estaHabilitado ? 'bg-success' : 'bg-warning text-dark'} mt-1">
-                                                ${v.estaHabilitado ? 'APROBADO' : 'PENDIENTE'}
-                                            </span>
+                                           <span class="badge ${v.estado === 'APROBADO' ? 'bg-success' : v.estado === 'RECHAZADO' ? 'bg-danger' : 'bg-warning text-dark'} mt-1">
+                                            ${v.estado}
+                                          </span>
+
                                         </div>
                                     </td>
                                     <td class="text-center small text-muted">
                                         ${v.capacidadPeso || 0} kg / ${v.capacidadVol || 0} m³
                                     </td>
                                     <td class="text-center small text-muted">
-                                        ${v.updatedAt ? new Date(v.updatedAt).toLocaleDateString('es-AR') : 'Pendiente'}
+                                        ${v.fechaGestion ? new Date(v.fechaGestion).toLocaleDateString('es-AR') : 'Pendiente'}
+
                                     </td>
                                 </tr>
                             `).join('') || '<tr><td colspan="4" class="text-center p-3">No hay vehículos</td></tr>'}
@@ -432,9 +451,11 @@ const renderDetallesProveedor = (proveedor) => {
                                         <h6 class="fw-bold mb-1 text-uppercase">${v.modelo || 'Sin modelo'}</h6>
                                         <span class="badge bg-light text-dark border fw-normal">${v.patente || '---'}</span>
                                     </div>
-                                    <span class="badge ${v.estaHabilitado ? 'bg-success' : 'bg-warning text-dark'} shadow-sm">
-                                        ${v.estaHabilitado ? 'APROBADO' : 'PENDIENTE'}
-                                    </span>
+                                 <span class="badge ${v.estado === 'APROBADO' ? 'bg-success' : v.estado === 'RECHAZADO' ? 'bg-danger' :'bg-warning text-dark'} shadow-sm">
+                                    ${v.estado}
+                                </span>
+
+
                                 </div>
                                 
                                 <div class="row g-2 border-top pt-3">
@@ -451,7 +472,9 @@ const renderDetallesProveedor = (proveedor) => {
                                         <div>
                                             <label class="text-muted d-block" style="font-size: 0.6rem; line-height: 1;">ÚLTIMA GESTIÓN</label>
                                             <span class="small" style="font-size: 0.75rem;">
-                                                ${v.updatedAt ? new Date(v.updatedAt).toLocaleString('es-AR') : 'Pendiente de revisión'}
+                                              
+                                            ${v.fechaGestion ? new Date(v.fechaGestion).toLocaleDateString('es-AR') : 'Pendiente'}
+
                                             </span>
                                         </div>
                                     </div>
@@ -467,7 +490,45 @@ const renderDetallesProveedor = (proveedor) => {
 
     container.innerHTML = html;
 };
+
+// document.addEventListener('DOMContentLoaded', () => {
+//     getAdminStats();
+//     const ultimaVista = localStorage.getItem("vistaActual");
+
+//     if (!ultimaVista) {
+//         // Si no hay nada guardado → vista inicial
+//         getPendingVehicles();
+//     } else if (ultimaVista === "proveedores") {
+//         mostrarProveedores();
+//     } else if (ultimaVista === "detalles") {
+//         const id = localStorage.getItem("proveedorId");
+//         if (id) {
+//             mostrarProveedores().then(() => {
+//                 const prov = todosLosProveedores.find(p => p.id === id);
+//                 if (prov) renderDetallesProveedor(prov);
+//             });
+//         } else {
+//             getPendingVehicles(); // fallback si no hay proveedorId
+//         }
+//     } else {
+//         getPendingVehicles(); // cualquier otro caso → inicio
+//     }
+// });
 document.addEventListener('DOMContentLoaded', () => {
     getAdminStats();
-    getPendingVehicles();
+
+    const token = localStorage.getItem('token');
+    const role = localStorage.getItem('userRole');
+
+    if (!token || role !== 'ADMIN') {
+        window.location.href = '../../auth/login.html';
+        return;
+    }
+
+    vistaActual = 'vehiculos';
+    localStorage.removeItem("vistaActual");
+    localStorage.removeItem("proveedorId");
+
+    getPendingVehicles(); // ✅ ahora se ejecuta solo si hay token
 });
+
