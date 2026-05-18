@@ -351,169 +351,298 @@ window.getPendingVehicles = getPendingVehicles;
 
 
 
+// const renderDetallesProveedor = (proveedor) => {
+//     const container = document.getElementById('tabla-vehiculos-container');
+
+//     // Cambiamos el título de la card principal
+//     const cardTitle = document.querySelector('.card-header h5');
+//     if (cardTitle) cardTitle.innerText = `Expediente: ${proveedor.nombre}`;
+
+//     let html = `
+//         <div class="p-3 mb-5">
+// <div class="card border-0 shadow-sm mb-4">
+//     <div class="card-header bg-white py-3">
+//         <h6 class="mb-0 text-primary"><i class="bi bi-person-badge me-2"></i>Datos Personales</h6>
+//     </div>
+//     <div class="card-body">
+//         <div class="row g-3">
+//             <div class="col-6 col-md-3">
+//                 <label class="text-muted small d-block">Nombre Completo</label>
+//                 <span class="fw-bold">${proveedor.nombre || proveedor.name || 'Sin nombre'}</span>
+//             </div>
+//             <div class="col-6 col-md-3">
+//                 <label class="text-muted small d-block">D.N.I / CUIL</label>
+//                 <span class="fw-bold">${proveedor.dni || '---'}</span>
+//             </div>
+//             <div class="col-6 col-md-3">
+//                 <label class="text-muted small d-block">Teléfono</label>
+//                 <span class="fw-bold text-success">
+//                     <i class="bi bi-whatsapp me-1"></i>${proveedor.telefono || proveedor.phone || '---'}
+//                 </span>
+//             </div>
+//             <div class="col-6 col-md-3">
+//                 <label class="text-muted small d-block">Fecha de Alta</label>
+//                 <span class="fw-bold">
+//     ${proveedor.fechaCreacion ? new Date(proveedor.fechaCreacion).toLocaleString('es-AR') : '---'}            </div>
+//         </div>
+//     </div>
+// </div>
+
+       
+//         <div class="card border-0 shadow-sm mb-4">
+//             <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+//                 <h6 class="mb-0 text-primary"><i class="bi bi-truck me-2"></i>Flota de Vehículos</h6>
+//                 <span class="badge bg-primary-subtle text-primary rounded-pill">
+//                     ${proveedor.vehiculos?.length || 0} unidades
+//                 </span>
+//             </div>
+            
+//             <div class="card-body p-2 p-md-0"> <!-- Padding reducido en mobile para las cards -->
+                
+//                 <!-- VISTA DESKTOP: Tabla tradicional -->
+//                 <div class="table-responsive d-none d-md-block">
+//                     <table class="table table-hover align-middle mb-0">
+//                         <thead class="bg-light small fw-bold">
+//                             <tr>
+//                                 <th class="ps-3">MODELO / PATENTE</th>
+//                                 <th class="text-center">TIPO / ESTADO</th>
+//                                 <th class="text-center">CAPACIDAD</th>
+//                                 <th class="text-center">FECHA GESTIÓN</th>
+//                             </tr>
+//                         </thead>
+//                         <tbody>
+//                             ${proveedor.vehiculos?.map(v => `
+//                                 <tr>
+//                                     <td class="ps-3">
+//                                         <div class="fw-bold text-dark">${v.modelo || 'Sin modelo'}</div>
+//                                         <div class="badge bg-light text-dark border fw-normal" style="font-size: 0.7rem;">
+//                                             ${v.patente || '---'}
+//                                         </div>
+//                                     </td>
+//                                     <td class="text-center">
+//                                         <div class="d-flex flex-column align-items-center">
+//                                             <span class="fw-bold text-uppercase small">${v.tipo_vehiculo || '---'}</span>
+//                                            <span class="badge ${v.estado === 'APROBADO' ? 'bg-success' : v.estado === 'RECHAZADO' ? 'bg-danger' : 'bg-warning text-dark'} mt-1">
+//                                             ${v.estado}
+//                                           </span>
+
+//                                         </div>
+//                                     </td>
+//                                     <td class="text-center small text-muted">
+//                                         ${v.capacidadPeso || 0} kg / ${v.capacidadVol || 0} m³
+//                                     </td>
+//                                     <td class="text-center small text-muted">
+//                                         ${v.fechaGestion ? new Date(v.fechaGestion).toLocaleDateString('es-AR') : 'Pendiente'}
+
+//                                     </td>
+//                                 </tr>
+//                             `).join('') || '<tr><td colspan="4" class="text-center p-3">No hay vehículos</td></tr>'}
+//                         </tbody>
+//                     </table>
+//                 </div>
+
+//                 <!-- VISTA MOBILE: Cards individuales -->
+//                 <div class="d-md-none">
+//                     ${proveedor.vehiculos?.map(v => `
+//                         <div class="card border shadow-sm mb-3 mx-2">
+//                             <div class="card-body p-3">
+//                                 <div class="d-flex justify-content-between align-items-start mb-3">
+//                                     <div>
+//                                         <h6 class="fw-bold mb-1 text-uppercase">${v.modelo || 'Sin modelo'}</h6>
+//                                         <span class="badge bg-light text-dark border fw-normal">${v.patente || '---'}</span>
+//                                     </div>
+//                                  <span class="badge ${v.estado === 'APROBADO' ? 'bg-success' : v.estado === 'RECHAZADO' ? 'bg-danger' :'bg-warning text-dark'} shadow-sm">
+//                                     ${v.estado}
+//                                 </span>
+
+
+//                                 </div>
+                                
+//                                 <div class="row g-2 border-top pt-3">
+//                                     <div class="col-6">
+//                                         <label class="text-muted d-block mb-1" style="font-size: 0.65rem; letter-spacing: 0.5px;">TIPO</label>
+//                                         <span class="fw-bold small text-uppercase">${v.tipo_vehiculo || '---'}</span>
+//                                     </div>
+//                                     <div class="col-6">
+//                                         <label class="text-muted d-block mb-1" style="font-size: 0.65rem; letter-spacing: 0.5px;">CAPACIDAD</label>
+//                                         <span class="small fw-semibold">${v.capacidadPeso || 0}kg / ${v.capacidadVol || 0}m³</span>
+//                                     </div>
+//                                     <div class="col-12 mt-3 bg-light rounded p-2 d-flex align-items-center">
+//                                         <i class="bi bi-calendar3 text-primary me-2"></i>
+//                                         <div>
+//                                             <label class="text-muted d-block" style="font-size: 0.6rem; line-height: 1;">ÚLTIMA GESTIÓN</label>
+//                                             <span class="small" style="font-size: 0.75rem;">
+                                              
+//                                             ${v.fechaGestion ? new Date(v.fechaGestion).toLocaleDateString('es-AR') : 'Pendiente'}
+
+//                                             </span>
+//                                         </div>
+//                                     </div>
+//                                 </div>
+//                             </div>
+//                         </div>
+//                     `).join('') || '<p class="text-center text-muted p-4">No hay vehículos registrados</p>'}
+//                 </div>
+
+//             </div>
+//         </div>
+//     `;
+
+//     container.innerHTML = html;
+// };
+
 const renderDetallesProveedor = (proveedor) => {
     const container = document.getElementById('tabla-vehiculos-container');
 
-    // Cambiamos el título de la card principal
+    // Cambiamos el título
     const cardTitle = document.querySelector('.card-header h5');
     if (cardTitle) cardTitle.innerText = `Expediente: ${proveedor.nombre}`;
 
+    // Guardamos la flota original
+    flotaActual = proveedor.vehiculos || [];
+    proveedorSeleccionado = proveedor;
+
     let html = `
         <div class="p-3 mb-5">
-<div class="card border-0 shadow-sm mb-4">
-    <div class="card-header bg-white py-3">
-        <h6 class="mb-0 text-primary"><i class="bi bi-person-badge me-2"></i>Datos Personales</h6>
-    </div>
-    <div class="card-body">
-        <div class="row g-3">
-            <div class="col-6 col-md-3">
-                <label class="text-muted small d-block">Nombre Completo</label>
-                <span class="fw-bold">${proveedor.nombre || proveedor.name || 'Sin nombre'}</span>
-            </div>
-            <div class="col-6 col-md-3">
-                <label class="text-muted small d-block">D.N.I / CUIL</label>
-                <span class="fw-bold">${proveedor.dni || '---'}</span>
-            </div>
-            <div class="col-6 col-md-3">
-                <label class="text-muted small d-block">Teléfono</label>
-                <span class="fw-bold text-success">
-                    <i class="bi bi-whatsapp me-1"></i>${proveedor.telefono || proveedor.phone || '---'}
-                </span>
-            </div>
-            <div class="col-6 col-md-3">
-                <label class="text-muted small d-block">Fecha de Alta</label>
-                <span class="fw-bold">
-    ${proveedor.fechaCreacion ? new Date(proveedor.fechaCreacion).toLocaleString('es-AR') : '---'}            </div>
-        </div>
-    </div>
-</div>
-
-       
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                <h6 class="mb-0 text-primary"><i class="bi bi-truck me-2"></i>Flota de Vehículos</h6>
-                <span class="badge bg-primary-subtle text-primary rounded-pill">
-                    ${proveedor.vehiculos?.length || 0} unidades
-                </span>
-            </div>
-            
-            <div class="card-body p-2 p-md-0"> <!-- Padding reducido en mobile para las cards -->
-                
-                <!-- VISTA DESKTOP: Tabla tradicional -->
-                <div class="table-responsive d-none d-md-block">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="bg-light small fw-bold">
-                            <tr>
-                                <th class="ps-3">MODELO / PATENTE</th>
-                                <th class="text-center">TIPO / ESTADO</th>
-                                <th class="text-center">CAPACIDAD</th>
-                                <th class="text-center">FECHA GESTIÓN</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${proveedor.vehiculos?.map(v => `
-                                <tr>
-                                    <td class="ps-3">
-                                        <div class="fw-bold text-dark">${v.modelo || 'Sin modelo'}</div>
-                                        <div class="badge bg-light text-dark border fw-normal" style="font-size: 0.7rem;">
-                                            ${v.patente || '---'}
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="d-flex flex-column align-items-center">
-                                            <span class="fw-bold text-uppercase small">${v.tipo_vehiculo || '---'}</span>
-                                           <span class="badge ${v.estado === 'APROBADO' ? 'bg-success' : v.estado === 'RECHAZADO' ? 'bg-danger' : 'bg-warning text-dark'} mt-1">
-                                            ${v.estado}
-                                          </span>
-
-                                        </div>
-                                    </td>
-                                    <td class="text-center small text-muted">
-                                        ${v.capacidadPeso || 0} kg / ${v.capacidadVol || 0} m³
-                                    </td>
-                                    <td class="text-center small text-muted">
-                                        ${v.fechaGestion ? new Date(v.fechaGestion).toLocaleDateString('es-AR') : 'Pendiente'}
-
-                                    </td>
-                                </tr>
-                            `).join('') || '<tr><td colspan="4" class="text-center p-3">No hay vehículos</td></tr>'}
-                        </tbody>
-                    </table>
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 text-primary"><i class="bi bi-truck me-2"></i>Flota de Vehículos</h6>
+                    <span class="badge bg-primary-subtle text-primary rounded-pill">
+                        ${proveedor.vehiculos?.length || 0} unidades
+                    </span>
                 </div>
+                <div class="card-body p-2 p-md-0">
 
-                <!-- VISTA MOBILE: Cards individuales -->
-                <div class="d-md-none">
-                    ${proveedor.vehiculos?.map(v => `
-                        <div class="card border shadow-sm mb-3 mx-2">
-                            <div class="card-body p-3">
-                                <div class="d-flex justify-content-between align-items-start mb-3">
-                                    <div>
-                                        <h6 class="fw-bold mb-1 text-uppercase">${v.modelo || 'Sin modelo'}</h6>
-                                        <span class="badge bg-light text-dark border fw-normal">${v.patente || '---'}</span>
-                                    </div>
-                                 <span class="badge ${v.estado === 'APROBADO' ? 'bg-success' : v.estado === 'RECHAZADO' ? 'bg-danger' :'bg-warning text-dark'} shadow-sm">
-                                    ${v.estado}
-                                </span>
+                    <!-- Select de filtro -->
+                    <div class="mb-3">
+                        <label for="filtro-estado" class="form-label small text-muted">Filtrar por estado:</label>
+                        <select id="filtro-estado" class="form-select form-select-sm w-auto">
+                            <option value="todos">Todos</option>
+                            <option value="APROBADO">Aprobados</option>
+                            <option value="RECHAZADO">Rechazados</option>
+                            <option value="PENDIENTE">Pendientes</option>
+                        </select>
+                    </div>
 
-
-                                </div>
-                                
-                                <div class="row g-2 border-top pt-3">
-                                    <div class="col-6">
-                                        <label class="text-muted d-block mb-1" style="font-size: 0.65rem; letter-spacing: 0.5px;">TIPO</label>
-                                        <span class="fw-bold small text-uppercase">${v.tipo_vehiculo || '---'}</span>
-                                    </div>
-                                    <div class="col-6">
-                                        <label class="text-muted d-block mb-1" style="font-size: 0.65rem; letter-spacing: 0.5px;">CAPACIDAD</label>
-                                        <span class="small fw-semibold">${v.capacidadPeso || 0}kg / ${v.capacidadVol || 0}m³</span>
-                                    </div>
-                                    <div class="col-12 mt-3 bg-light rounded p-2 d-flex align-items-center">
-                                        <i class="bi bi-calendar3 text-primary me-2"></i>
-                                        <div>
-                                            <label class="text-muted d-block" style="font-size: 0.6rem; line-height: 1;">ÚLTIMA GESTIÓN</label>
-                                            <span class="small" style="font-size: 0.75rem;">
-                                              
-                                            ${v.fechaGestion ? new Date(v.fechaGestion).toLocaleDateString('es-AR') : 'Pendiente'}
-
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('') || '<p class="text-center text-muted p-4">No hay vehículos registrados</p>'}
+                    <!-- Contenedor de la flota -->
+                    <div id="tabla-flota"></div>
                 </div>
-
             </div>
         </div>
     `;
 
     container.innerHTML = html;
+
+    // Render inicial
+    renderTablaFlota(flotaActual);
+
+    // Asociar evento al select (solo una vez)
+    document.getElementById('filtro-estado').addEventListener('change', (e) => {
+        filtrarVehiculos(e.target.value);
+    });
 };
 
-// document.addEventListener('DOMContentLoaded', () => {
-//     getAdminStats();
-//     const ultimaVista = localStorage.getItem("vistaActual");
 
-//     if (!ultimaVista) {
-//         // Si no hay nada guardado → vista inicial
-//         getPendingVehicles();
-//     } else if (ultimaVista === "proveedores") {
-//         mostrarProveedores();
-//     } else if (ultimaVista === "detalles") {
-//         const id = localStorage.getItem("proveedorId");
-//         if (id) {
-//             mostrarProveedores().then(() => {
-//                 const prov = todosLosProveedores.find(p => p.id === id);
-//                 if (prov) renderDetallesProveedor(prov);
-//             });
-//         } else {
-//             getPendingVehicles(); // fallback si no hay proveedorId
-//         }
-//     } else {
-//         getPendingVehicles(); // cualquier otro caso → inicio
-//     }
-// });
+
+function renderTablaFlota(vehiculos) {
+    const tablaContainer = document.getElementById('tabla-flota');
+
+    let html = `
+        <!-- VISTA DESKTOP -->
+        <div class="table-responsive d-none d-md-block">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light small fw-bold">
+                    <tr>
+                        <th class="ps-3">MODELO / PATENTE</th>
+                        <th class="text-center">TIPO / ESTADO</th>
+                        <th class="text-center">CAPACIDAD</th>
+                        <th class="text-center">FECHA GESTIÓN</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${vehiculos.map(v => `
+                        <tr>
+                            <td class="ps-3">
+                                <div class="fw-bold text-dark">${v.modelo || 'Sin modelo'}</div>
+                                <div class="badge bg-light text-dark border fw-normal" style="font-size: 0.7rem;">
+                                    ${v.patente || '---'}
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <div class="d-flex flex-column align-items-center">
+                                    <span class="fw-bold text-uppercase small">${v.tipo_vehiculo || '---'}</span>
+                                    <span class="badge ${v.estado === 'APROBADO' ? 'bg-success' : v.estado === 'RECHAZADO' ? 'bg-danger' : 'bg-warning text-dark'} mt-1">
+                                        ${v.estado}
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="text-center small text-muted">
+                                ${v.capacidadPeso || 0} kg / ${v.capacidadVol || 0} m³
+                            </td>
+                            <td class="text-center small text-muted">
+                                ${v.fechaGestion ? new Date(v.fechaGestion).toLocaleDateString('es-AR') : 'Pendiente'}
+                            </td>
+                        </tr>
+                    `).join('') || '<tr><td colspan="4" class="text-center p-3">No hay vehículos</td></tr>'}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- VISTA MOBILE -->
+        <div class="d-md-none">
+            ${vehiculos.map(v => `
+                <div class="card border shadow-sm mb-3 mx-2">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h6 class="fw-bold mb-1 text-uppercase">${v.modelo || 'Sin modelo'}</h6>
+                                <span class="badge bg-light text-dark border fw-normal">${v.patente || '---'}</span>
+                            </div>
+                            <span class="badge ${v.estado === 'APROBADO' ? 'bg-success' : v.estado === 'RECHAZADO' ? 'bg-danger' : 'bg-warning text-dark'} shadow-sm">
+                                ${v.estado}
+                            </span>
+                        </div>
+                        <div class="row g-2 border-top pt-3">
+                            <div class="col-6">
+                                <label class="text-muted d-block mb-1" style="font-size: 0.65rem;">TIPO</label>
+                                <span class="fw-bold small text-uppercase">${v.tipo_vehiculo || '---'}</span>
+                            </div>
+                            <div class="col-6">
+                                <label class="text-muted d-block mb-1" style="font-size: 0.65rem;">CAPACIDAD</label>
+                                <span class="small fw-semibold">${v.capacidadPeso || 0}kg / ${v.capacidadVol || 0}m³</span>
+                            </div>
+                            <div class="col-12 mt-3 bg-light rounded p-2 d-flex align-items-center">
+                                <i class="bi bi-calendar3 text-primary me-2"></i>
+                                <div>
+                                    <label class="text-muted d-block" style="font-size: 0.6rem;">ÚLTIMA GESTIÓN</label>
+                                    <span class="small">${v.fechaGestion ? new Date(v.fechaGestion).toLocaleDateString('es-AR') : 'Pendiente'}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('') || '<p class="text-center text-muted p-4">No hay vehículos registrados</p>'}
+        </div>
+    `;
+
+    tablaContainer.innerHTML = html;
+}
+
+
+function filtrarVehiculos(estado) {
+  let filtrados = [];
+
+  if (estado === 'todos') {
+    filtrados = flotaActual;
+  } else {
+    filtrados = flotaActual.filter(v => v.estado === estado);
+  }
+
+  renderTablaFlota(filtrados);
+}
+
+
+
 document.addEventListener('DOMContentLoaded', () => {
     getAdminStats();
 

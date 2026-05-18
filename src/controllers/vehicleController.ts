@@ -2,19 +2,7 @@ import type { Request, Response } from 'express';
 import db from '../db.js';
 
 
-// export const getPendingVehicles = async (req: Request, res: Response) => {
-//     try {
-//         const vehicles = await db.vehicle.findMany({
-//             where: { 
-//                 estado: "PENDIENTE" // Solo los que están esperando
-//             },
-//             include: { proveedor: true }
-//         });
-//         res.json(vehicles);
-//     } catch (error) {
-//         res.status(500).json({ error: 'Error al obtener vehículos pendientes' });
-//     }
-// };
+
 export const getPendingVehicles = async (req: Request, res: Response) => {
     try {
         const vehicles = await db.vehicle.findMany({
@@ -30,27 +18,17 @@ export const getPendingVehicles = async (req: Request, res: Response) => {
 };
 
 
-
-
-
-
-
-
 export const updateVehicleStatus = async (req: Request, res: Response) => {
     const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
 
     //const { id } = req.params;
     const { accion } = req.body; // El front envía "APROBAR" o "RECHAZAR"
-
-
-
     const nuevoEstado =
         accion === 'APROBAR'
             ? "APROBADO"
             : accion === 'RECHAZAR'
                 ? "RECHAZADO"
                 : "PENDIENTE";
-
     try {
         await db.vehicle.update({
             where: { id },
