@@ -8,18 +8,22 @@ datasource db {
 }
 
 model User {
-  id              String    @id @default(uuid())
-  nombre          String
-  dni       String   @unique
-  email           String    @unique
-  passwordHash    String
-  rol             Role      @default(CLIENTE)
-  telefono        String?
-  fechaCreacion   DateTime  @default(now())
-  pedidosCliente  Order[]   @relation("ClienteOrders")
-  viajesProveedor Order[]   @relation("ProveedorOrders")
-  vehiculos Vehicle[]
+  id                      String   @id @default(uuid())
+  nombre                  String
+  dni                     String   @unique
+  email                   String   @unique
+  passwordHash            String
+  rol                     Role     @default(CLIENTE)
+  telefono                String?
+  fechaCreacion           DateTime @default(now())
+  pedidosCliente          Order[]  @relation("ClienteOrders")
+  viajesProveedor         Order[]  @relation("ProveedorOrders")
+  vehiculos               Vehicle[]
 
+  fotoPerfil              String?  // ruta o URL
+  dniPdf                  String?
+  certificadoAntecedente  String?
+  licenciaConducir        String?
 }
 
 

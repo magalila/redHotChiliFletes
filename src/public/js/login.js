@@ -5,7 +5,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     const password = document.getElementById('password').value;
 
     try {
-        const response = await fetch('http://localhost:3000/api/auth/login', {
+        const response = await fetch('http://localhost:3000/api/users/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -28,13 +28,13 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 
                 // 3. Redirección lógica según el rol de la base de datos
                 if (usuario.rol === 'ADMIN') {
-                    window.location.href = '../views/admin/dashboard.html';
+                    window.location.href = '../views/admin/dashboard.html'; // lista de vehículos pendientes
                 } else if (usuario.rol === 'PROVEEDOR') {
-                    window.location.href = '../provider/my-vehicles.html';
+                    window.location.href = '../provider/proveedor-dashboard.html'; // panel del proveedor
                 } else {
-                    // Para clientes u otros roles
                     alert('Bienvenido/a ' + usuario.nombre);
                 }
+
             } else {
                 console.error('Estructura de usuario no encontrada en la respuesta:', data);
                 alert('Error de configuración en el usuario. Contacte al administrador.');
@@ -48,10 +48,13 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         console.error('Error de conexión:', error);
         alert('No se pudo conectar con el servidor de RedHotChiliFletes.');
     }
-      const logout = () => {
-    // Eliminamos el token y datos del usuario
-    localStorage.removeItem('token');
-    // Redirigimos al login (ajustá la ruta según tu carpeta)
-    window.location.href = '../../auth/login.html'; 
-};
+    const logout = () => {
+        // Eliminamos el token y datos del usuario
+        localStorage.removeItem('token');
+        // Redirigimos al login (ajustá la ruta según tu carpeta)
+        window.location.href = '../../auth/login.html';
+    };
+});
+document.getElementById('registerBtn').addEventListener('click', () => {
+    window.location.href = '../auth/register.html';
 });

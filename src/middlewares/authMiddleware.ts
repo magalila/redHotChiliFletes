@@ -11,8 +11,8 @@ export const verificarToken = (req: Request, res: Response, next: NextFunction) 
     try {
         const decoded = jwt.verify(token, 'MI_FRASE_SUPER_SECRETA') as any;
         // Inyectamos ID y ROL para que las rutas de ADMIN funcionen
-        (req as any).userId = decoded.userId; 
-        (req as any).rol = decoded.rol; 
+        (req as any).userId = decoded.userId;
+        (req as any).rol = decoded.rol;
         next();
     } catch (error) {
         res.status(403).json({ error: 'Token inválido' });
@@ -27,10 +27,21 @@ export const esAdmin = (req: Request, res: Response, next: NextFunction) => {
     const rol = (req as any).rol;
 
     if (rol !== 'ADMIN') {
-        return res.status(403).json({ 
-            error: 'Acceso denegado: Se requieren permisos de administrador.' 
+        return res.status(403).json({
+            error: 'Acceso denegado: Se requieren permisos de administrador.'
         });
     }
-    
+
     next();
 };
+
+
+export const esProveedor = (req: Request, res: Response, next: NextFunction) => {
+    const rol = (req as any).rol;
+
+    if (rol !== 'PROVEEDOR') {
+        return res.status(403).json({ message: 'Acceso denegado: solo proveedores' });
+    }
+
+    next();
+};;
